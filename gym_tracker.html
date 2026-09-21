@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GYM TRACKER 💪</title>
+<style>
+:root{--bg:#07090d;--card:#11151d;--card2:#0d1118;--text:#f4f6f8;--muted:#8e98a8;--line:#242b37;--accent:#8cff00}
+*{box-sizing:border-box}body{margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 15% 0%,#1d3a18 0,transparent 32%),radial-gradient(circle at 100% 20%,#172436 0,transparent 30%),linear-gradient(145deg,#050609,#0b1017 55%,#06080b);min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:28px 28px}
+.app{max-width:760px;margin:auto;padding:28px 16px 48px;position:relative}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:22px}.eyebrow{font-size:12px;letter-spacing:.18em;color:var(--accent);font-weight:800}.title{font-size:30px;font-weight:900;letter-spacing:-.04em}.sub{color:var(--muted);font-size:14px;margin-top:4px}
+button,input{font:inherit}button{cursor:pointer;color:var(--text);background:#151a23;border:1px solid var(--line);border-radius:13px;padding:12px 14px;font-weight:750}button.primary{background:var(--accent);color:#071000;border-color:var(--accent)}button:active{transform:scale(.98)}
+.schemas{display:flex;gap:8px;overflow:auto;padding-bottom:10px}.schema.active{border-color:var(--accent);background:#17200f}
+.panel{background:rgba(13,17,24,.84);border:1px solid var(--line);border-radius:22px;padding:16px;backdrop-filter:blur(10px);box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.panelhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}.heading{font-size:21px;font-weight:900}.count{color:var(--muted);font-size:13px}
+.exercise{background:linear-gradient(145deg,#141a23,#0c1017);border:1px solid #252d3a;border-radius:18px;padding:15px;margin:10px 0}.exhead{display:flex;gap:8px;margin-bottom:12px}.name{flex:1;min-width:0;background:#090c11;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px;font-weight:800}.set{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin:8px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input{width:100%;background:#090c11;border:1px solid var(--line);color:var(--text);border-radius:11px;padding:11px}.small{font-size:12px;color:var(--muted)}.empty{text-align:center;padding:35px 10px;color:var(--muted)}.footer{margin-top:14px;color:#667080;font-size:12px;text-align:center}
+@media(max-width:520px){.title{font-size:26px}.set{grid-template-columns:1fr 1fr}.set button{grid-column:1/-1}.top{align-items:flex-start}.top button{white-space:nowrap}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div><div class="eyebrow">TRAIN • TRACK • PROGRESS</div><div class="title">GYM TRACKER 💪</div><div class="sub">Jouw training. Jouw gewichten. Jouw progressie.</div></div><button class="primary" id="addSchema">＋ Schema</button></div>
+<div class="schemas" id="schemas"></div>
+<div class="panel"><div class="panelhead"><div><div class="heading" id="schemaTitle"></div><div class="count" id="schemaCount"></div></div><button id="addExercise">＋ Oefening</button></div><div id="exercises"></div></div>
+<div class="footer" id="status">Alles blijft tijdens deze sessie bewaard.</div>
+</div>
+<script>
+let schemas=[{name:"Push",exercises:[{name:"Bench Press",sets:[{weight:40,reps:8},{weight:40,reps:8},{weight:40,reps:7}]}]}],current=0;
+const $=s=>document.querySelector(s), esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function render(){let s=schemas[current];$("#schemas").innerHTML=schemas.map((x,i)=>`<button class="schema ${i==current?"active":""}" data-schema="${i}">${esc(x.name)}</button>`).join("");$("#schemaTitle").textContent=s.name;$("#schemaCount").textContent=s.exercises.length+" oefening"+(s.exercises.length==1?"":"en");$("#exercises").innerHTML=s.exercises.length?s.exercises.map((e,ei)=>`<div class="exercise"><div class="exhead"><input class="name" data-name="${ei}" value="${esc(e.name)}"><button data-del="${ei}">🗑️</button></div>${e.sets.map((a,si)=>`<div class="set"><div class="field"><label>Gewicht (kg)</label><input type="number" min="0" step=".5" data-w="${ei}:${si}" value="${a.weight}"></div><div class="field"><label>Herhalingen</label><input type="number" min="0" step="1" data-r="${ei}:${si}" value="${a.reps}"></div><button data-dset="${ei}:${si}">✕ Set</button></div>`).join("")}<button class="small" data-aset="${ei}">＋ Set toevoegen</button></div>`).join(""):`<div class="empty">Nog geen oefeningen.<br>Voeg je eerste oefening toe! 🔥</div>`}
+document.addEventListener("click",e=>{let b=e.target.closest("button");if(!b)return;if(b.id=="addSchema"){let n=prompt("Naam van je nieuwe schema:","Pull");if(n?.trim()){schemas.push({name:n.trim(),exercises:[]});current=schemas.length-1;render()}}else if(b.id=="addExercise"){schemas[current].exercises.push({name:"Nieuwe oefening",sets:[{weight:0,reps:0}]});render()}else if(b.dataset.schema){current=+b.dataset.schema;render()}else if(b.dataset.del!==undefined){schemas[current].exercises.splice(+b.dataset.del,1);render()}else if(b.dataset.aset!==undefined){schemas[current].exercises[+b.dataset.aset].sets.push({weight:0,reps:0});render()}else if(b.dataset.dset){let [ei,si]=b.dataset.dset.split(":").map(Number);schemas[current].exercises[ei].sets.splice(si,1);render()}});
+document.addEventListener("input",e=>{let t=e.target;if(t.dataset.name!==undefined)schemas[current].exercises[+t.dataset.name].name=t.value;if(t.dataset.w){let[a,b]=t.dataset.w.split(":").map(Number);schemas[current].exercises[a].sets[b].weight=Math.max(0,+t.value||0)}if(t.dataset.r){let[a,b]=t.dataset.r.split(":").map(Number);schemas[current].exercises[a].sets[b].reps=Math.max(0,Math.floor(+t.value||0))}$("#status").textContent="✓ Laatste wijziging opgeslagen"});
+render();
+</script>
+</body></html>
